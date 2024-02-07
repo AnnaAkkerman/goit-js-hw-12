@@ -44,7 +44,8 @@ body {
   outline: none;
 }
 
-.searchBtn {
+.searchBtn,
+.loadBtn {
   padding: 8px 16px;
   border-radius: 8px;
   background-color: rgba(78, 117, 255, 1);
@@ -58,14 +59,20 @@ body {
   transition: background-color 250ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.searchBtn:hover {
+.searchBtn:hover,
+.loadBtn:hover {
   background-color: rgba(108, 140, 255, 1);
+}
+
+.loadBtn {
+  margin-bottom: 30px;
 }
 
 .gallery {
   display: flex;
   flex-wrap: wrap;
   gap: 24px;
+  margin-bottom: 32px;
 }
 
 .gallery-item {
@@ -124,6 +131,7 @@ body {
   content: 'Loading images, please wait...';
   position: relative;
   z-index: 5;
+  margin-top: 25px;
 }
 
 .loader:before {
@@ -138,6 +146,7 @@ body {
   background: linear-gradient(#ff3d00 100%, transparent 0) no-repeat;
   background-size: 0% auto;
   animation: 10s lineGrow linear infinite;
+  margin-top: 10px;
 }
 
 @keyframes lineGrow {

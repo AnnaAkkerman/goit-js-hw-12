@@ -125,6 +125,7 @@ body {
   font-family: 'Montserrat', sans-serif;
   font-weight: 400;
   position: relative;
+  margin-bottom: 50px;
 }
 
 .loader:after {

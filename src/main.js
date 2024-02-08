@@ -7,6 +7,8 @@ import axios from 'axios';
 
 const searchForm = document.querySelector('.js-search-form');
 const list = document.querySelector('.gallery');
+let spanLoader = document.querySelector('.loader');
+let loadBtn;
 
 const gallery = new SimpleLightbox('.gallery a', {
   captionsData: 'alt',
@@ -15,28 +17,40 @@ const gallery = new SimpleLightbox('.gallery a', {
 
 let page = 1;
 let perPage = 15;
+let totalPages;
 
 const handleSubmit = async e => {
   e.preventDefault();
 
   const value = e.target.elements.search.value;
 
-  const hasLoader = document.querySelector('.loader');
-  const loadBtn = document.querySelector('.loadBtn');
-
+  loadBtn = document.querySelector('.loadBtn');
   if (loadBtn) loadBtn.remove();
-  if (value !== '' && !hasLoader) {
+
+  if (value !== '') {
     page = 1;
     list.innerHTML = '';
 
     searchForm.insertAdjacentHTML('afterend', '<span class="loader"></span>');
+    spanLoader = document.querySelector('.loader');
 
     const data = await getPictures(value);
     setTimeout(() => {
-      const spanLoader = document.querySelector('.loader');
       if (spanLoader) spanLoader.remove();
       renderImages(data.hits);
-      if (data.hits.length > 0) addButtonLoad(value);
+
+      totalPages = Math.ceil(data.totalHits / perPage);
+      if (page < totalPages) {
+        addButtonLoad(value);
+      } else {
+        if (data.hits.length !== 0) {
+          iziToast.error({
+            position: 'topRight',
+            message:
+              "We're sorry, but you've reached the end of search results.",
+          });
+        }
+      }
     }, 500);
   }
   searchForm.reset();
@@ -106,41 +120,38 @@ function addButtonLoad(value) {
     'afterend',
     '<button type="button" class="loadBtn">Load more</button>'
   );
-  const loadBtn = document.querySelector('.loadBtn');
+  loadBtn = document.querySelector('.loadBtn');
 
   loadBtn.addEventListener('click', async () => {
-    loadBtn.style.visibility = 'hidden';
     loadBtn.insertAdjacentHTML('beforebegin', '<span class="loader"></span>');
+    loadBtn.remove();
+
     page += 1;
 
     const data = await getPictures(value);
     setTimeout(() => {
-      const spanLoader = document.querySelector('.loader');
+      spanLoader = document.querySelector('.loader');
       if (spanLoader) spanLoader.remove();
       renderImages(data.hits);
-      if (data.hits.length > 0) {
-        loadBtn.style.visibility = 'visible';
+      list.parentNode.insertBefore(loadBtn, list.nextSibling);
 
-        const galleryItem = document.querySelector('.gallery-item');
-        if (galleryItem) {
-          const rect = galleryItem.getBoundingClientRect().height;
-          window.scrollBy({
-            top: rect * 2,
-            behavior: 'smooth',
-          });
-        }
+      if (page >= totalPages) {
+        loadBtn.remove();
+        iziToast.error({
+          position: 'topRight',
+          message: "We're sorry, but you've reached the end of search results.",
+        });
+      }
+
+      const galleryItem = document.querySelector('.gallery-item:last-child');
+      if (galleryItem) {
+        const rect = galleryItem.getBoundingClientRect().height;
+        window.scrollBy({
+          top: rect * 2,
+          behavior: 'smooth',
+        });
       }
     }, 500);
-
-    const totalPages = Math.ceil(data.totalHits / perPage);
-
-    if (page > totalPages) {
-      loadBtn.remove();
-      iziToast.error({
-        position: 'topRight',
-        message: "We're sorry, but you've reached the end of search results.",
-      });
-    }
   });
 }
 
